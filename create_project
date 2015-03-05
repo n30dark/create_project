@@ -59,11 +59,11 @@ switch ($type) {
     system("composer create-project --dev --keep-vcs typo3/flow-base-distribution $project.local.sergiopaulino.net"); 
     #setting file permissions
     system("cd $project.local.sergiopaulino.net");
-    system("./flow core:setfilepermissions root www-data www-data")
+    system("./flow core:setfilepermissions root www-data www-data");
   }
   case "fuelphp"    { 
     system("sudo curl get.fuelphp.com/oil | sh"); 
-    system("oil create $project.local.sergiopaulino.net")
+    system("oil create $project.local.sergiopaulino.net");
   }
   case "li3"        { 
     system("mkdir $project.local.sergiopaulino.net"); 
@@ -85,9 +85,6 @@ switch ($type) {
   }
   case "october"    { 
     system("composer create-project october/october $project.local.sergiopaulino.net dev-master"); 
-  }
-  else              {
-    die("create a new project with: ./create_project TYPE PROJECTNAME"); 
   }
   
 }
