@@ -1,0 +1,123 @@
+#!/usr/bin/perl
+
+use strict;
+
+use File::Copy;
+
+
+
+our $project = $ARGV[0];
+
+die("create a new project with: ./create_project PROJECTNAME") unless $project;
+
+
+
+print "==creating new project named $project\n";
+
+system("composer create-project laravel/laravel $project.local.sergiopaulino.net --prefer-dist");
+
+
+
+print "==creating apache configuration\n";
+
+
+
+our $sites_available_dir = "/etc/apache2/sites-available";
+
+our $sites_enabled_dir = "/etc/apache2/sites-enabled";
+
+our $apache_vhost_file = $sites_available_dir."/".$project.".local.sergiopaulino.net";
+
+our $apache_enabled_file = $sites_enabled_dir."/".$project.".local.sergipaulino.net";
+
+our $apache_vhost_example = $sites_available_dir."/PROJECT.local.sergiopaulino.net";
+
+
+
+our $homedir = "/var/www";
+
+our $basedir = $homedir."/projects";
+
+our $projectdir = $basedir."/".$project.".local.sergiopaulino.net";
+
+our $publicdir = $projectdir."/public_html";
+
+
+
+print "==[ Apache configuration\n ";
+
+unless(-f $apache_vhost_file) {
+
+print "==[ VHOST file $apache_vhost_file does not exist\n ";
+
+copy($apache_vhost_example, $apache_vhost_file);
+
+} else {
+
+print "==[ VHOST file already exists\n ";
+
+}
+
+
+
+print "==[ VHOST file $apache_vhost_file configured\n ";
+
+#AMke a backup first
+
+copy($apache_vhost_file, $apache_vhost_file.".bak");
+
+open FILE, "<", $apache_vhost_file or die $!;
+
+my $config = "";
+
+while(<FILE>) {
+
+$_ =~ s/PROJECT/$project/g;
+
+$config .= $_;
+
+}
+
+close FILE;
+
+
+
+#Write out the config file
+
+open OUTPUTFILE, ">", $apache_vhost_file or die $!;
+
+print OUTPUTFILE $config;
+
+close OUTPUTFILE;
+
+print "==[ VHOST file $apache_vhost_file geconfigureerd\n";
+
+
+
+print "==[ VHOST $apache_vhost_file linked to $apache_enabled_file\n";
+
+unless(-f $apache_enabled_file) {
+
+print "==[ Symlink created\n ";
+
+system("ln -s $apache_vhost_file $apache_enabled_file");
+
+} else {
+
+print "==[ Symlink created\n ";
+
+}
+
+die("==[ Symlink could not be created!\n ") unless(-f $apache_enabled_file);
+
+
+
+print "==[ Apache configuration test:\n\n ";
+
+system("apache2ctl configtest");
+
+print "\n==[ Everything is ok, reloading apache ]==\n ";
+
+system("sudo /etc/init.d/apache2 reload ");
+
+
