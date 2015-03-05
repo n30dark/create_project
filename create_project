@@ -86,6 +86,9 @@ switch ($projecttype) {
   case "october"    { 
     system("composer create-project october/october $project.local.sergiopaulino.net dev-master"); 
   }
+  else              {
+    die("create a new project with: ./create_project TYPE PROJECTNAME"); 
+  }
   
 }
 
