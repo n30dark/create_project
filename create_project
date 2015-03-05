@@ -11,7 +11,7 @@ die("create a new project with: ./create_project TYPE PROJECTNAME") unless $proj
 
 print "==creating new $type project named $project\n";
 
-switch ($projecttype) {
+switch ($type) {
   
   case "laravel"    { 
     system("composer create-project laravel/laravel $project.local.sergiopaulino.net --prefer-dist"); 
