@@ -1,123 +1,142 @@
 #!/usr/bin/perl
-
 use strict;
-
+use warnings;
 use File::Copy;
+use Switch;
 
+our $type = $ARGV[0];
+our $project = $ARGV[1];
 
+die("create a new project with: ./create_project TYPE PROJECTNAME") unless $project;
 
-our $project = $ARGV[0];
+print "==creating new $type project named $project\n";
 
-die("create a new project with: ./create_project PROJECTNAME") unless $project;
-
-
-
-print "==creating new project named $project\n";
-
-system("composer create-project laravel/laravel $project.local.sergiopaulino.net --prefer-dist");
-
-
+switch ($projecttype) {
+  
+  case "laravel"    { 
+    system("composer create-project laravel/laravel $project.local.sergiopaulino.net --prefer-dist"); 
+  }
+  case "symfony"    { 
+    system("symfony new $project.local.sergiopaulino.net");
+    system("cd $project.local.sergiopaulino.net");
+    system("php app/console server:run");
+  }
+  case "pyrocms"    { 
+    system("mkdir $project.local.sergiopaulino.net"); 
+    system("cd $project.local.sergiopaulino.net");
+    system("git clone https://github.com/pyrocms/pyrocms .");
+  }
+  case "drupal"     { 
+    system("mkdir $project.local.sergiopaulino.net"); 
+    system("cd $project.local.sergiopaulino.net");
+    system("wget http://ftp.drupal.org/files/projects/drupal-7.34.tar.gz"); 
+    system("tar -xzvf drupal-7.34.tar.gz");
+    system("rm drupal-7.34.tar.gz");
+    system("mv drupal-7.34/* drupal-x.x/.htaccess ./");
+    system("mv mv drupal-7.34/.gitignore ./");
+    system("rmdir drupal-7.34");
+  }
+  case "slim"       { 
+    system("mkdir $project.local.sergiopaulino.net"); 
+    system("composer require slim/slim"); 
+    
+    #creating index file initializing slim in the application
+    open(my $fh, '>', "index.php") or die "Could not open 'index.php'";
+    print $fh "<?php\nrequire 'vendor/autoload.php';"
+    close $fh;
+    
+  }
+  case "zf2"        { 
+    system("php composer.phar create-project --repository-url="http://packages.zendframework.com" zendframework/skeleton-application $project.local.sergiopaulino.net"); 
+  }
+  case "aura"       { 
+    system("composer create-project aura/system $project.local.sergiopaulino.net"); 
+    #start the in-built PHP server
+    system("cd $project.local.sergiopaulino.net");
+    system("php package/Aura.Framework/cli/server");
+  }
+  case "typo3"      { 
+    system("composer create-project --dev --keep-vcs typo3/flow-base-distribution $project.local.sergiopaulino.net"); 
+    #setting file permissions
+    system("cd $project.local.sergiopaulino.net");
+    system("./flow core:setfilepermissions root www-data www-data")
+  }
+  case "fuelphp"    { 
+    system("sudo curl get.fuelphp.com/oil | sh"); 
+    system("oil create $project.local.sergiopaulino.net")
+  }
+  case "li3"        { 
+    system("mkdir $project.local.sergiopaulino.net"); 
+    system("cd $project.local.sergiopaulino.net");
+    system("git clone --origin distro https://github.com/UnionOfRAD/framework.git .");
+    system("git submodule update --init");
+  }
+  case "nette"      { 
+    system("composer create-project nette/sandbox $project.local.sergiopaulino.net"); 
+    system("cd $project.local.sergiopaulino.net && chmod -R a+rw temp log");
+  }
+  case "wordpress"  { 
+    system("mkdir $project.local.sergiopaulino.net"); 
+    system("cd $project.local.sergiopaulino.net");
+    system("wget http://wordpress.org/latest.tar.gz"); 
+    system("tar -xzvf latest.tar.gz "); 
+    system("mv latest.tar.gz/* ./"); 
+    system("rmdir wordpress/ && rm -f latest.tar.gz"); 
+  }
+  case "october"    { 
+    system("composer create-project october/october $project.local.sergiopaulino.net dev-master"); 
+  }
+  
+}
 
 print "==creating apache configuration\n";
 
-
-
 our $sites_available_dir = "/etc/apache2/sites-available";
-
 our $sites_enabled_dir = "/etc/apache2/sites-enabled";
-
 our $apache_vhost_file = $sites_available_dir."/".$project.".local.sergiopaulino.net";
-
 our $apache_enabled_file = $sites_enabled_dir."/".$project.".local.sergipaulino.net";
-
 our $apache_vhost_example = $sites_available_dir."/PROJECT.local.sergiopaulino.net";
-
-
-
 our $homedir = "/var/www";
-
 our $basedir = $homedir."/projects";
-
 our $projectdir = $basedir."/".$project.".local.sergiopaulino.net";
-
 our $publicdir = $projectdir."/public_html";
 
-
-
 print "==[ Apache configuration\n ";
-
 unless(-f $apache_vhost_file) {
-
-print "==[ VHOST file $apache_vhost_file does not exist\n ";
-
-copy($apache_vhost_example, $apache_vhost_file);
-
+  print "==[ VHOST file $apache_vhost_file does not exist\n ";
+  copy($apache_vhost_example, $apache_vhost_file);
 } else {
-
-print "==[ VHOST file already exists\n ";
-
+  print "==[ VHOST file already exists\n ";
 }
-
-
-
 print "==[ VHOST file $apache_vhost_file configured\n ";
 
-#AMke a backup first
-
+#Make a backup first
 copy($apache_vhost_file, $apache_vhost_file.".bak");
-
 open FILE, "<", $apache_vhost_file or die $!;
-
 my $config = "";
-
 while(<FILE>) {
-
-$_ =~ s/PROJECT/$project/g;
-
-$config .= $_;
-
+  $_ =~ s/PROJECT/$project/g;
+  $config .= $_;
 }
-
 close FILE;
 
-
-
 #Write out the config file
-
 open OUTPUTFILE, ">", $apache_vhost_file or die $!;
-
 print OUTPUTFILE $config;
-
 close OUTPUTFILE;
-
-print "==[ VHOST file $apache_vhost_file geconfigureerd\n";
-
-
-
+print "==[ VHOST file $apache_vhost_file configured\n";
 print "==[ VHOST $apache_vhost_file linked to $apache_enabled_file\n";
 
 unless(-f $apache_enabled_file) {
-
-print "==[ Symlink created\n ";
-
-system("ln -s $apache_vhost_file $apache_enabled_file");
-
+  print "==[ Symlink created\n ";
+  system("sudo ln -s $apache_vhost_file $apache_enabled_file");
 } else {
-
-print "==[ Symlink created\n ";
-
+  print "==[ Symlink created\n ";
 }
 
 die("==[ Symlink could not be created!\n ") unless(-f $apache_enabled_file);
 
-
-
 print "==[ Apache configuration test:\n\n ";
-
-system("apache2ctl configtest");
-
+system("sudo apache2ctl configtest");
 print "\n==[ Everything is ok, reloading apache ]==\n ";
-
 system("sudo /etc/init.d/apache2 reload ");
-
-
