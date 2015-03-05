@@ -42,7 +42,7 @@ switch ($type) {
     
     #creating index file initializing slim in the application
     open(my $fh, '>', "index.php") or die "Could not open 'index.php'";
-    print $fh "<?php\nrequire 'vendor/autoload.php';"
+    print $fh "<?php\nrequire 'vendor/autoload.php';";
     close $fh;
     
   }
