@@ -4,9 +4,9 @@
 	ServerAlias PROJECT.office.sergiopaulino.net
 	ServerAlias PROJECT.home.sergiopaulino.net
 
-        DocumentRoot /home/developer/sites/PROJECT.local.sergiopaulino.net/public/
+        DocumentRoot /var/www/projects/PROJECT.local.sergiopaulino.net/public/
 	SetEnv APPLICATION_ENV development
-        <Directory /home/developer/sites/PROJECT.local.sergiopaulino.net/public>
+        <Directory /var/www/projects/PROJECT.local.sergiopaulino.net/public>
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride All
                 Order allow,deny
